@@ -6,7 +6,7 @@
   (require 'uiop))
 
 ; Set these variables
-(defparameter cmc-api-key "x-x-x-x-x")
+(defparameter cmc-api-key nil) ; x-x-x-x-x
 (defparameter to-recipient "nobody@nowhere.com")
 
 (defparameter resp nil)
@@ -48,7 +48,9 @@
   (setq current-tether-supply (get-supply-int (api-call)))
   (let ((difference (- current-tether-supply last-tether-supply)))
     (if (not (eq difference 0))
-	(print "supply change!")
+	(progn
+	  (print "supply change!")
+	  (send-message difference current-tether-supply))
 	(print "No change"))      
     (setq last-tether-supply current-tether-supply)))
   
@@ -62,6 +64,9 @@
 		   (sb-ext:unschedule-timer timer))))
 
 (defun main ()
-  (setq current-tether-supply (get-supply-int (api-call)))
-  (setq last-tether-supply current-tether-supply)
-  (setup-api-timer))
+  (if (equal cmc-api-key nil)
+      (print "Coinmarketcap API key not set")
+      (progn
+	(setq current-tether-supply (get-supply-int (api-call)))
+	(setq last-tether-supply current-tether-supply)
+	(setup-api-timer))))
